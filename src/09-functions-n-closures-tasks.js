@@ -23,8 +23,8 @@
  *   getComposition(Math.sin, Math.asin)(x) => Math.sin(Math.asin(x))
  *
  */
-function getComposition(/* f, g */) {
-  throw new Error('Not implemented');
+function getComposition(f, g) {
+  return (x) => f(g(x));
 }
 
 
@@ -44,8 +44,8 @@ function getComposition(/* f, g */) {
  *   power05(16) => 4
  *
  */
-function getPowerFunction(/* exponent */) {
-  throw new Error('Not implemented');
+function getPowerFunction(exponent) {
+  return (x) => x ** exponent;
 }
 
 
@@ -62,8 +62,20 @@ function getPowerFunction(/* exponent */) {
  *   getPolynom(8)     => y = 8
  *   getPolynom()      => null
  */
-function getPolynom() {
-  throw new Error('Not implemented');
+function getPolynom(a, b, c) {
+  return (x) => {
+    let result = null;
+    if (!a && !b && !c) {
+      result = null;
+    } else if (!b && !c) {
+      result = a;
+    } else if (!c) {
+      result = (a * x) + b;
+    } else {
+      result = (a * (x ** 2)) + (b * x) + c;
+    }
+    return result;
+  };
 }
 
 
@@ -81,8 +93,14 @@ function getPolynom() {
  *   ...
  *   memoizer() => the same random number  (next run, returns the previous cached result)
  */
-function memoize(/* func */) {
-  throw new Error('Not implemented');
+function memoize(func) {
+  let mem = null;
+  return () => {
+    if (!mem) {
+      mem = func();
+    }
+    return mem;
+  };
 }
 
 
@@ -101,8 +119,19 @@ function memoize(/* func */) {
  * }, 2);
  * retryer() => 2
  */
-function retry(/* func, attempts */) {
-  throw new Error('Not implemented');
+function retry(func, attempts) {
+  return () => {
+    let res = null;
+    for (let i = 0; i < attempts;) {
+      try {
+        res = func();
+        i = attempts;
+      } catch (e) {
+        i += 1;
+      }
+    }
+    return res;
+  };
 }
 
 
@@ -169,8 +198,16 @@ function partialUsingArguments(/* fn, ...args1 */) {
  *   getId4() => 7
  *   getId10() => 11
  */
-function getIdGeneratorFunction(/* startFrom */) {
-  throw new Error('Not implemented');
+function getIdGeneratorFunction(startFrom) {
+  const key = `${startFrom}`;
+  const obj = {
+    [key]: startFrom - 1,
+  };
+  return () => {
+    obj[key] += 1;
+    return obj[key];
+  };
+  // throw new Error('Not implemented');
 }
 
 
