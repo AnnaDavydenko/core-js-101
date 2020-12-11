@@ -58,8 +58,12 @@ function getJSON(obj) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  const obj = {};
+  const params = JSON.parse(json);
+  Object.assign(obj, params);
+  Object.setPrototypeOf(obj, proto);
+  return obj;
 }
 
 
@@ -118,45 +122,71 @@ function fromJSON(/* proto, json */) {
  */
 
 const cssSelectorBuilder = {
-  selectors: [],
+  result: '',
+  order: 0,
+
   element(value) {
-    this.selectors.push(value);
-    return this;
+    this.checkOrder(0);
+    this.result += value;
+    return this.createSelector('element');
   },
 
   id(value) {
-    this.selectors.push(`#${value}`);
-    return this;
+    this.checkOrder(1);
+    this.result += `#${value}`;
+    return this.createSelector('id');
   },
 
   class(value) {
-    this.selectors.push(`.${value}`);
-    return this;
+    this.checkOrder(2);
+    this.result += `.${value}`;
+    return this.createSelector();
   },
 
   attr(value) {
-    this.selectors.push(`[${value}]`);
-    return this;
+    this.checkOrder(3);
+    this.result += `[${value}]`;
+    return this.createSelector();
   },
 
   pseudoClass(value) {
-    this.selectors.push(`:${value}`);
-    return this;
+    this.checkOrder(4);
+    this.result += `:${value}`;
+    return this.createSelector();
   },
 
   pseudoElement(value) {
-    this.selectors.push(`::${value}`);
-    return this;
+    this.checkOrder(5);
+    this.result += `::${value}`;
+    return this.createSelector('pseudoElement');
   },
 
   combine(selector1, combinator, selector2) {
-    this.selectors.push(`${selector1} ${combinator} ${selector2}`);
-    return this;
+    this.result = `${selector1.stringify()} ${combinator} ${selector2.stringify()}`;
+    return this.createSelector();
   },
+
   stringify() {
-    const result = this.selectors.join('');
-    this.selectors = [];
-    return result;
+    return this.result;
+  },
+
+  checkOrder(n) {
+    if (n < this.order) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    this.order = n;
+  },
+
+  createSelector(elem) {
+    const obj = { ...this };
+    obj[elem] = () => {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector',
+      );
+    };
+    this.result = '';
+    this.order = 0;
+    return obj;
   },
 };
 

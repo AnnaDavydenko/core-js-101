@@ -158,8 +158,16 @@ function retry(func, attempts) {
  * cos(3.141592653589793) ends
  *
  */
-function logger(/* func, logFunc */) {
-  throw new Error('Not implemented');
+function logger(func, logFunc) {
+  return (...rest) => {
+    const params = JSON.stringify(rest).slice(1, -1);
+    const startsMessage = `${func.name}(${params}) starts`;
+    const endsMessage = `${func.name}(${params}) ends`;
+    logFunc(startsMessage);
+    const res = func(...rest);
+    logFunc(endsMessage);
+    return res;
+  };
 }
 
 
@@ -176,8 +184,12 @@ function logger(/* func, logFunc */) {
  *   partialUsingArguments(fn, 'a','b','c')('d') => 'abcd'
  *   partialUsingArguments(fn, 'a','b','c','d')() => 'abcd'
  */
-function partialUsingArguments(/* fn, ...args1 */) {
-  throw new Error('Not implemented');
+function partialUsingArguments(fn, ...args1) {
+  const newArgs = args1;
+  return (...args2) => {
+    const fnArgs = newArgs.concat(Array(...args2));
+    return fn(...fnArgs);
+  };
 }
 
 
@@ -207,7 +219,6 @@ function getIdGeneratorFunction(startFrom) {
     obj[key] += 1;
     return obj[key];
   };
-  // throw new Error('Not implemented');
 }
 
 
